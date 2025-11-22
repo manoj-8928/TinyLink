@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>TinyLink Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="max-w-4xl mx-auto py-10">
+
+    <!-- Header -->
+    <h1 class="text-4xl font-bold text-center text-indigo-600">TinyLink</h1>
+
+    <!-- Create form -->
+    <div class="mt-10 bg-white shadow-lg p-6 rounded-xl">
+      <form method="post" action="/create" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <input
+          type="text"
+          name="url"
+          placeholder="https://example.com"
+          required
+          class="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <input
+          type="text"
+          name="customCode"
+          placeholder="Custom code (optional)"
+          class="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <button
+          type="submit"
+          class="bg-indigo-600 text-white rounded-lg p-3 hover:bg-indigo-700 transition">
+          Generate
+        </button>
+      </form>
+
+      <% if (id) { %>
+      <p class="mt-4 text-green-600 font-semibold">
+        Short link created:
+        <a href="<%= baseUrl %>/<%= id %>" class="text-indigo-600 underline" target="_blank">
+          <%= baseUrl %>/<%= id %>
+        </a>
+      </p>
+      <% } %>
+    </div>
+
+    <!-- Links Table -->
+    <div class="mt-10 bg-white shadow-lg p-6 rounded-xl">
+      <h2 class="text-2xl font-semibold mb-4">All Short Links</h2>
+
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-indigo-600 text-white">
+            <th class="p-3 text-left">#</th>
+            <th class="p-3 text-left">Code</th>
+            <th class="p-3 text-left">Target URL</th>
+            <th class="p-3 text-left">Clicks</th>
+            <th class="p-3 text-left">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <div class="flex justify-end mb-4">
+  <input
+    id="searchInput"
+    type="text"
+    placeholder="Search by code or URL..."
+    class="border p-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+  />
+</div>
+
+          <% links.forEach((l, i) => { %>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3"><%= i + 1 %></td>
+
+            <td class="p-3">
+              <a href="/code/<%= l.code %>" class="text-indigo-600 underline">
+                <%= l.code %>
+              </a>
+            </td>
+
+            <td class="p-3">
+              <a href="<%= l.targetUrl %>" target="_blank" class="text-gray-700">
+                <%= l.targetUrl %>
+              </a>
+            </td>
+
+            <td class="p-3 font-semibold"><%= l.totalClicks %></td>
+             <td class="p-3">
+      <form action="/api/links/<%= l.code %>?_method=DELETE" method="POST">
+        <button
+          type="submit"
+          class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition">
+          Delete
+        </button>
+      </form>
+    </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  <script>
+  const searchInput = document.getElementById("searchInput");
+  const rows = document.querySelectorAll("tbody tr");
+
+  searchInput.addEventListener("keyup", () => {
+    const term = searchInput.value.toLowerCase();
+
+    rows.forEach(row => {
+      const code = row.children[1].innerText.toLowerCase();
+      const url = row.children[2].innerText.toLowerCase();
+
+      if (code.includes(term) || url.includes(term)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+</script>
+
+</body>
+
+</html>
